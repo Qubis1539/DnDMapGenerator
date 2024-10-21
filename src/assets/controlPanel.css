@@ -1,0 +1,46 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	/* display: none; <- Crashes Chrome on hover */
+	-webkit-appearance: none;
+	margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+.controlPanel {
+	display: flex;
+	flex-direction: column;
+}
+.controlPanel input[type="number"] {
+	width: 30px;
+	height: 30px;
+	text-align: center;
+}
+.controlPanel__field {
+	display: flex;
+	flex-direction: column;
+}
+
+.controlPanel__row {
+	display: flex;
+	flex-direction: row;
+}
+
+.mapSizeController {
+	display: flex;
+	justify-content: space-between;
+}
+.mapSizeController__field {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 40%;
+}
+.mapSizeController__field input {
+	display: block;
+	max-width: 100%;
+}
+.mapSizeController__field input[type="number"] {
+	width: 30px;
+	height: 30px;
+	text-align: center;
+}

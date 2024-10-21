@@ -2,39 +2,71 @@
 import React, { useEffect } from "react";
 import * as THREE from "three";
 
-const ThreeScene = () => {
-    useEffect(() => {
-        // Инициализация сцены, камеры и рендера
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+const ThreeScene = ({ size }) => {
+	useEffect(() => {
+		console.log(size);
 
-        // Создание геометрии и материала
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+		// Инициализация сцены, камеры и рендера
+		const scene = new THREE.Scene();
+		const camera = new THREE.PerspectiveCamera(60, 1, 1, 2000);
+		const renderer = new THREE.WebGLRenderer();
 
-        camera.position.z = 5;
+		// Установка размеров рендера
+		const width = 50 * 20;
+		const height = 50 * 20;
+		renderer.setSize(width, height);
+		document.body.appendChild(renderer.domElement);
 
-        // Функция анимации
-        const animate = () => {
-            requestAnimationFrame(animate);
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-            renderer.render(scene, camera);
-        };
-        animate();
+		// Создание геометрии и материала
+		const geometry = new THREE.BoxGeometry();
 
-        return () => {
-            // Удаление рендера при размонтировании
-            document.body.removeChild(renderer.domElement);
-        };
-    }, []);
+		// geometry.setSize(2, 2, 2);
+		const material = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+		// const cube = new THREE.Mesh(geometry, material);
 
-    return null; // Этот компонент не рендерит ничего
+		const sheet = [];
+		const startPosX = -width / 2 + 20;
+		const startPosY = height / 2 - 20;
+		const cubeSize = 20;
+		for (let i = 0; i < 3; i++) {
+			sheet.push([]);
+			for (let j = 0; j < 3; j++) {
+				const square2d = new THREE.PlaneGeometry(cubeSize, cubeSize);
+				const cube2d = new THREE.Mesh(square2d, material);
+
+				cube2d.position.set(
+					startPosX + i * cubeSize + i,
+					startPosY - j * cubeSize - j,
+					0
+				);
+				sheet[i].push(cube2d);
+				scene.add(cube2d);
+			}
+		}
+		console.log(scene);
+
+		// scene.add(cube);
+		// scene.add(cube2d);
+
+		camera.position.z = width / 2 / Math.tan((60 * Math.PI) / 360);
+		// Функция анимации
+		const animate = () => {
+			requestAnimationFrame(animate);
+			// cube.scale.set(size.x, size.y, 1);
+
+			// cube2d.rotation.z += 0.01;
+			// cube2d.rotation.y += 0.01;
+			renderer.render(scene, camera);
+		};
+		animate();
+
+		return () => {
+			// Удаление рендера при размонтировании
+			document.body.removeChild(renderer.domElement);
+		};
+	}, []);
+
+	return null; // Этот компонент не рендерит ничего
 };
 
 export default ThreeScene;
