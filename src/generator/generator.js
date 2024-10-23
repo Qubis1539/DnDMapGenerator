@@ -14,16 +14,16 @@ const generateMap = () => {
 
 const generateProceduralMap = (xSize, ySize) => {
     const map = [];
-    for (let i = 0; i < xSize; i++) {
+    for (let x = 0; x < xSize; x++) {
         map.push([]);
-        for (let j = 0; j < ySize; j++) {
+        for (let y = 0; y < ySize; y++) {
             const random = Math.random();
             if (random < 0.3) {
-                map[i][j] = 1; // wall
+                map[x][y] = 1; // wall
             } else if (random < 0.6) {
-                map[i][j] = 2; // floor
+                map[x][y] = 2; // floor
             } else {
-                map[i][j] = 0; // empty
+                map[x][y] = 0; // empty
             }
         }
     }
