@@ -1,5 +1,6 @@
 import Room from "./Room.js";
 import Cell from "./Cell.js";
+import { log } from "three/webgpu";
 class Dungeon {
 	constructor(cellSize, width, height, roomSize, roomCount, lootCount) {
 		this.cellSize = cellSize;
@@ -14,11 +15,14 @@ class Dungeon {
 	}
 
 	generateRooms() {
-		for (let i = 0; i < this.roomCount; i++) {
-			const x = Math.floor(Math.random() * (this.width - this.roomSize));
-			const y = Math.floor(Math.random() * (this.height - this.roomSize));
+		// for (let i = 0; i < this.roomCount; i++)
+		console.log("generateRooms");
 
-			const loot = this.getRandomLoot();
+		let roomGenerateAttempts = 1;
+		while (this.rooms.length < this.roomCount && roomGenerateAttempts > 0) {
+			// console.log("roomGenerateAttempts", roomGenerateAttempts);
+
+			// const loot = this.getRandomLoot();
 			// cellSize, roomSize, lootCount, dungeonWidth, dungeonHeight
 			const room = new Room(
 				this.cellSize,
@@ -27,11 +31,40 @@ class Dungeon {
 				this.width,
 				this.height
 			);
+			let attempts = 10;
+			// console.log("room", room);
+			// console.log("this.rooms", this.rooms);
+			// console.log(this.isCollidedList(room, this.rooms));
+
+			while (this.isCollidedList(room, this.rooms) || attempts <= 0) {
+				// console.log("room is collided find new position");
+
+				room.findPosition();
+				attempts--;
+			}
+			if (attempts <= 0) {
+				roomGenerateAttempts--;
+				// console.log("room is not added");
+				continue;
+			}
+
 			this.rooms.push(room);
 		}
-		this.fixRoomsCollisions();
+
+		console.log("this.rooms", this.rooms);
+		// this.fixRoomsCollisions();
+	}
+	isCollidedList(target, list) {
+		for (let i = 0; i < list.length; i++) {
+			if (this.isCollided(target, list[i])) {
+				return true;
+			}
+		}
+		return false;
 	}
 	isCollided(target1, target2) {
+		// console.log("++");
+
 		if (
 			target1.x < target2.x + target2.width &&
 			target1.x + target1.width > target2.x &&
@@ -42,19 +75,19 @@ class Dungeon {
 		}
 		return false;
 	}
-	fixRoomsCollisions(attempts = 10) {
-		if (attempts <= 0) {
-			return;
-		}
-		for (let i = 0; i < this.rooms.length; i++) {
-			for (let j = i + 1; j < this.rooms.length; j++) {
-				if (this.isCollided(this.rooms[i], this.rooms[j])) {
-					this.rooms[j].findPosition();
-					this.fixRoomsCollisions(attempts - 1);
-				}
-			}
-		}
-	}
+	// fixRoomsCollisions(attempts = 10) {
+	// 	if (attempts <= 0) {
+	// 		return;
+	// 	}
+	// 	for (let i = 0; i < this.rooms.length; i++) {
+	// 		for (let j = i + 1; j < this.rooms.length; j++) {
+	// 			if (this.isCollided(this.rooms[i], this.rooms[j])) {
+	// 				this.rooms[j].findPosition();
+	// 				this.fixRoomsCollisions(attempts - 1);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	getRandomRoomSize() {
 		// Случайный размер комнаты в пределах допустимых значений.

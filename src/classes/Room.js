@@ -52,7 +52,7 @@ class Room {
 				this.cells[y][x] = new Cell(x, y, "floor");
 			}
 		}
-		console.log(this.cells);
+		// console.log(this.cells);
 
 		return this.cells;
 	}
