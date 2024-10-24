@@ -11,10 +11,10 @@ function App() {
 			showControls: false,
 		},
 		mapSize: {
-			x: 1,
-			y: 1,
+			x: 32,
+			y: 32,
 		},
-		mapType: "forest",
+		mapType: "dungeon",
 		mapTypeSettings: {
 			forest: {
 				bashes: 10,
@@ -36,8 +36,8 @@ function App() {
 			},
 			dungeon: {
 				lootCount: 10,
-				roomCount: 10,
-				roomSize: 10,
+				roomCount: 3,
+				roomSize: 6,
 			},
 		},
 		mapSeed: "12345",
@@ -70,7 +70,7 @@ function App() {
 			{/* <h1>Генератор окружений D&D</h1> */}
 			<ControlPanel settings={settings} setSettings={setSettings} />
 
-			<CanvasComponent />
+			<CanvasComponent settings={settings} />
 			{/* <ThreeScene size={settings.mapSize} /> */}
 		</div>
 	);
