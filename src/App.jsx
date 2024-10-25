@@ -11,8 +11,8 @@ function App() {
 			showControls: false,
 		},
 		mapSize: {
-			x: 32,
-			y: 32,
+			x: 16,
+			y: 16,
 		},
 		mapType: "dungeon",
 		mapTypeSettings: {

@@ -1,7 +1,10 @@
+import { log } from "three/webgpu";
 import Cell from "./Cell";
+import { uniqueId } from "lodash";
 
 class Room {
 	constructor(cellSize, roomSize, lootCount, mapWidth, mapHeight) {
+		this.id = uniqueId();
 		this.cellSize = cellSize;
 		this.lootCount = lootCount;
 		this.roomSize = roomSize;
@@ -18,6 +21,19 @@ class Room {
 		this.loot = [];
 
 		this.findPosition();
+		this.calcRoomCells();
+	}
+
+	cutRoom() {
+		if (this.x + this.width > this.mapWidth) {
+			this.width = this.mapWidth - this.x;
+		}
+
+		if (this.y + this.height > this.mapHeight) {
+			this.height = this.mapHeight - this.y;
+		}
+		// console.log("cutted");
+
 		this.calcRoomCells();
 	}
 
@@ -40,16 +56,30 @@ class Room {
 
 	randomSize() {
 		// Генерация случайного размера комнаты, например, 3x3 клетки, 5x5 клетки и т.д.
-		return Math.floor(Math.random() * this.roomSize - 1) + 3; // Пример: от 2 до 5 клеток
+		return Math.floor(Math.random() * this.roomSize - 1) + 5; // Пример: от 2 до 5 клеток
 	}
 
 	calcRoomCells() {
 		// console.log(this.x, this.y, this.width, this.height);
 
+		this.cells = [];
+
 		for (let y = this.y; y < this.height + this.y; y++) {
 			this.cells[y] = [];
 			for (let x = this.x; x < this.width + this.x; x++) {
-				this.cells[y][x] = new Cell(x, y, "floor");
+				this.cells[y][x] = new Cell(x, y, "room");
+				if (x === this.x) {
+					this.cells[y][x].mod.push("wall-left");
+				}
+				if (x === this.width + this.x - 1) {
+					this.cells[y][x].mod.push("wall-right");
+				}
+				if (y === this.y) {
+					this.cells[y][x].mod.push("wall-top");
+				}
+				if (y === this.height + this.y - 1) {
+					this.cells[y][x].mod.push("wall-bottom");
+				}
 			}
 		}
 		// console.log(this.cells);

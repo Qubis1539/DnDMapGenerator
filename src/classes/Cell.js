@@ -1,8 +1,9 @@
 class Cell {
-	constructor(x, y, type = "empty") {
+	constructor(x, y, type = "empty", mod = []) {
 		this.x = x; // координаты клетки
 		this.y = y;
 		this.type = type; // тип клетки ('floor', 'wall', 'door', и т.д.)
+		this.mod = mod; // модификатор клетки
 	}
 
 	setType(type) {

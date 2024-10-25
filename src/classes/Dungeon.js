@@ -16,9 +16,9 @@ class Dungeon {
 
 	generateRooms() {
 		// for (let i = 0; i < this.roomCount; i++)
-		console.log("generateRooms");
+		// console.log("generateRooms");
 
-		let roomGenerateAttempts = 1;
+		let roomGenerateAttempts = 10;
 		while (this.rooms.length < this.roomCount && roomGenerateAttempts > 0) {
 			// console.log("roomGenerateAttempts", roomGenerateAttempts);
 
@@ -31,12 +31,13 @@ class Dungeon {
 				this.width,
 				this.height
 			);
+			room.cutRoom();
 			let attempts = 10;
 			// console.log("room", room);
 			// console.log("this.rooms", this.rooms);
 			// console.log(this.isCollidedList(room, this.rooms));
 
-			while (this.isCollidedList(room, this.rooms) || attempts <= 0) {
+			while (this.isCollidedList(room, this.rooms) && attempts > 0) {
 				// console.log("room is collided find new position");
 
 				room.findPosition();
@@ -51,12 +52,17 @@ class Dungeon {
 			this.rooms.push(room);
 		}
 
-		console.log("this.rooms", this.rooms);
+		// console.log("this.rooms", this.rooms);
 		// this.fixRoomsCollisions();
 	}
 	isCollidedList(target, list) {
-		for (let i = 0; i < list.length; i++) {
-			if (this.isCollided(target, list[i])) {
+		// for (let i = 0; i < list.length; i++) {
+		// 	if (this.isCollided(target, list[i])) {
+		// 		return true;
+		// 	}
+		// }
+		for (let item of list) {
+			if (this.isCollided(target, item)) {
 				return true;
 			}
 		}
@@ -102,9 +108,75 @@ class Dungeon {
 			(Math.random() * fluctuation - fluctuation / 2)
 		);
 	}
+	isCoordClose(coord1, coord2, distance = 1) {
+		if (
+			(coord1.x + distance == coord2.x ||
+				coord1.x - distance == coord2.x) &&
+			coord1.y == coord2.y
+		) {
+			return true;
+		}
+		if (
+			(coord1.y + distance == coord2.y ||
+				coord1.y - distance == coord2.y) &&
+			coord1.x == coord2.x
+		) {
+			return true;
+		}
+
+		return false;
+	}
+	createDoors() {
+		for (let i = 0; i < this.rooms.length; i++) {
+			const room1 = this.rooms[i];
+			const room1Cells = room1.getRoomCells();
+
+			for (let j = i + 1; j < this.rooms.length; j++) {
+				const room2 = this.rooms[j];
+				const room2Cells = room2.getRoomCells();
+				// let minDistance = Infinity;
+				// let closestCell1 = null;
+				// let closestCell2 = null;
+				const closestCells = [];
+
+				for (let rowCell1 of room1Cells) {
+					for (let rowCell2 of room2Cells) {
+						if (rowCell1 == undefined || rowCell2 == undefined)
+							continue;
+						for (let cell1 of rowCell1) {
+							for (let cell2 of rowCell2) {
+								if (cell1 == undefined || cell2 == undefined)
+									continue;
+								console.log(`cell1: ${cell1.x}, ${cell1.y}`);
+								console.log(`cell2: ${cell2.x}, ${cell2.y}`);
+								if (this.isCoordClose(cell1, cell2)) {
+									closestCells.push([
+										cell1,
+										cell2,
+										room1,
+										room2,
+									]);
+								}
+							}
+						}
+					}
+				}
+
+				if (closestCells.length > 0) {
+				}
+
+				// if (closestCell1 && closestCell2) {
+				// 	closestCells.push([closestCell1, closestCell2]);
+				// }
+			}
+		}
+
+		console.log("closestCells", closestCells);
+	}
 
 	placeRooms() {
 		this.generateRooms();
+		this.createDoors();
 		// Логика размещения комнат, с учетом размещения друг относительно друга и стен.
 	}
 

@@ -6,16 +6,17 @@ import brick4 from "../assets/sprites/dungeon/floor/Bricks4.png";
 import Dungeon from "../classes/Dungeon.js";
 import { log } from "three/webgpu";
 
-const WIDTH = 800; // Ширина Canvas
-const HEIGHT = 600; // Высота Canvas
+const WIDTH = 64 * 10; // Ширина Canvas
+const HEIGHT = 64 * 10; // Высота Canvas
+const defSize = 64;
 
 const CanvasComponent = ({ settings }) => {
 	const canvasRef = useRef(null);
 	const [devMode, setDevMode] = useState(false);
 	const [dungeon, setDungeon] = useState(null);
 	const [dungeonFloorTiles, setDungeonFloorTiles] = useState([]);
-	const [WIDTH, setWIDTH] = useState(32 * 32);
-	const [HEIGHT, setHEIGHT] = useState(32 * 32);
+	const WIDTH = defSize * settings.mapSize.x;
+	const HEIGHT = defSize * settings.mapSize.y;
 
 	const toggleGameMode = () => {
 		setDevMode(!devMode);
@@ -41,9 +42,9 @@ const CanvasComponent = ({ settings }) => {
 		const canvas = canvasRef.current;
 		const ctx = canvas.getContext("2d");
 		ctx.strokeStyle = "red";
-		for (let y = 0; y < HEIGHT / 32; y++) {
-			for (let x = 0; x < WIDTH / 32; x++) {
-				ctx.strokeRect(x * 32, y * 32, 32, 32);
+		for (let y = 0; y < HEIGHT / defSize; y++) {
+			for (let x = 0; x < WIDTH / defSize; x++) {
+				ctx.strokeRect(x * defSize, y * defSize, defSize, defSize);
 			}
 		}
 	};
@@ -65,19 +66,71 @@ const CanvasComponent = ({ settings }) => {
 			// console.log(cell);
 
 			cellRow.forEach((cell) => {
-				if (cell.type === "floor") {
+				if (cell.type === "floor" || cell.type === "room") {
 					const img =
 						dungeonFloorTiles[Math.floor(Math.random() * 4)];
 					ctx.drawImage(
 						img,
 						cell.x * dungeon.cellSize,
 						cell.y * dungeon.cellSize,
-						32,
-						32
+						defSize,
+						defSize
+					);
+				}
+				if (cell.mod.includes("wall-left")) {
+					ctx.fillStyle = "gray";
+					ctx.fillRect(
+						cell.x * dungeon.cellSize,
+						cell.y * dungeon.cellSize,
+						1,
+						dungeon.cellSize
+					);
+				}
+				if (cell.mod.includes("wall-top")) {
+					ctx.fillStyle = "gray";
+					ctx.fillRect(
+						cell.x * dungeon.cellSize,
+						cell.y * dungeon.cellSize,
+						dungeon.cellSize,
+						1
+					);
+				}
+				if (cell.mod.includes("wall-right")) {
+					ctx.fillStyle = "gray";
+					ctx.fillRect(
+						(cell.x + 1) * dungeon.cellSize,
+						cell.y * dungeon.cellSize,
+						1,
+						dungeon.cellSize
+					);
+				}
+				if (cell.mod.includes("wall-bottom")) {
+					ctx.fillStyle = "gray";
+					ctx.fillRect(
+						cell.x * dungeon.cellSize,
+						(cell.y + 1) * dungeon.cellSize,
+						dungeon.cellSize,
+						1
 					);
 				}
 			});
 		});
+		// dungeonCells.forEach((cellRow) => {
+		// 	for (let i = 0; i < cellRow.length; i++) {
+		// 		if (cellRow[i].type === "room") {
+		// 			if (i == 0) {
+		// 				console.log(i);
+		// 				ctx.fillStyle = "white";
+		// 				ctx.fillRect(
+		// 					cellRow[i].x * dungeon.cellSize,
+		// 					cellRow[i].y * dungeon.cellSize,
+		// 					defSize,
+		// 					defSize
+		// 				);
+		// 			}
+		// 		}
+		// 	}
+		// });
 	};
 
 	const getMap = () => {
@@ -91,7 +144,7 @@ const CanvasComponent = ({ settings }) => {
 			// console.log(mapTypeSettings[mapType])	;
 
 			newDungeon = new Dungeon(
-				32,
+				defSize,
 				mapSize.x,
 				mapSize.y,
 				mapTypeSettings[mapType].roomSize,
@@ -119,12 +172,20 @@ const CanvasComponent = ({ settings }) => {
 	}, [dungeon]);
 
 	return (
-		<div>
+		<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				justifyContent: "center",
+				width: "100%",
+			}}
+		>
 			<canvas
 				ref={canvasRef}
 				width={WIDTH}
 				height={HEIGHT}
-				style={{ margin: "50px" }}
+				style={{ margin: "50px auto", border: "1px solid white" }}
 			/>
 
 			<button onClick={renderDungeon}>Rerender</button>
