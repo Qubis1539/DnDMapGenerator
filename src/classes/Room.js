@@ -23,7 +23,9 @@ class Room {
 		this.findPosition();
 		this.calcRoomCells();
 	}
+	// removeMod(mod) {
 
+	// }
 	cutRoom() {
 		if (this.x + this.width > this.mapWidth) {
 			this.width = this.mapWidth - this.x;

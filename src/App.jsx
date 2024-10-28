@@ -11,8 +11,8 @@ function App() {
 			showControls: false,
 		},
 		mapSize: {
-			x: 16,
-			y: 16,
+			x: 28,
+			y: 28,
 		},
 		mapType: "dungeon",
 		mapTypeSettings: {
@@ -36,7 +36,7 @@ function App() {
 			},
 			dungeon: {
 				lootCount: 10,
-				roomCount: 3,
+				roomCount: 12,
 				roomSize: 6,
 			},
 		},

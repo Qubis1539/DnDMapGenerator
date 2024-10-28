@@ -3,6 +3,7 @@ import brick1 from "../assets/sprites/dungeon/floor/Bricks1.png";
 import brick2 from "../assets/sprites/dungeon/floor/Bricks2.png";
 import brick3 from "../assets/sprites/dungeon/floor/Bricks3.png";
 import brick4 from "../assets/sprites/dungeon/floor/Bricks4.png";
+import brick1v1 from "../assets/sprites/dungeon/floor/Brick1V1.png";
 import Dungeon from "../classes/Dungeon.js";
 import { log } from "three/webgpu";
 
@@ -24,6 +25,7 @@ const CanvasComponent = ({ settings }) => {
 
 	const loadImagesFrom = () => {
 		// Загрузка изображений пола
+		// brick1, brick2, brick3, brick4
 		const images = [brick1, brick2, brick3, brick4];
 		const loadedImages = [];
 
@@ -68,7 +70,9 @@ const CanvasComponent = ({ settings }) => {
 			cellRow.forEach((cell) => {
 				if (cell.type === "floor" || cell.type === "room") {
 					const img =
-						dungeonFloorTiles[Math.floor(Math.random() * 4)];
+						dungeonFloorTiles[
+							Math.floor(Math.random() * dungeonFloorTiles.length)
+						];
 					ctx.drawImage(
 						img,
 						cell.x * dungeon.cellSize,
@@ -77,12 +81,13 @@ const CanvasComponent = ({ settings }) => {
 						defSize
 					);
 				}
+				const wallSize = 4;
 				if (cell.mod.includes("wall-left")) {
 					ctx.fillStyle = "gray";
 					ctx.fillRect(
-						cell.x * dungeon.cellSize,
+						cell.x * dungeon.cellSize - wallSize / 2,
 						cell.y * dungeon.cellSize,
-						1,
+						wallSize,
 						dungeon.cellSize
 					);
 				}
@@ -90,17 +95,17 @@ const CanvasComponent = ({ settings }) => {
 					ctx.fillStyle = "gray";
 					ctx.fillRect(
 						cell.x * dungeon.cellSize,
-						cell.y * dungeon.cellSize,
+						cell.y * dungeon.cellSize - wallSize / 2,
 						dungeon.cellSize,
-						1
+						wallSize
 					);
 				}
 				if (cell.mod.includes("wall-right")) {
 					ctx.fillStyle = "gray";
 					ctx.fillRect(
-						(cell.x + 1) * dungeon.cellSize,
+						(cell.x + 1) * dungeon.cellSize - wallSize / 2,
 						cell.y * dungeon.cellSize,
-						1,
+						wallSize,
 						dungeon.cellSize
 					);
 				}
@@ -108,9 +113,9 @@ const CanvasComponent = ({ settings }) => {
 					ctx.fillStyle = "gray";
 					ctx.fillRect(
 						cell.x * dungeon.cellSize,
-						(cell.y + 1) * dungeon.cellSize,
+						(cell.y + 1) * dungeon.cellSize - wallSize / 2,
 						dungeon.cellSize,
-						1
+						wallSize
 					);
 				}
 			});

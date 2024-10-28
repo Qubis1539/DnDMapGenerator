@@ -5,7 +5,15 @@ class Cell {
 		this.type = type; // тип клетки ('floor', 'wall', 'door', и т.д.)
 		this.mod = mod; // модификатор клетки
 	}
+	addMod(mod) {
+		if (this.mod.includes(mod)) return;
+		this.mod.push(mod);
+	}
 
+	removeMod(mod) {
+		if (!this.mod.includes(mod)) return;
+		this.mod.splice(this.mod.indexOf(mod), 1);
+	}
 	setType(type) {
 		this.type = type;
 	}
@@ -35,12 +43,7 @@ class Cell {
 				break;
 		}
 		// Отрисовываем квадрат в Canvas
-		ctx.fillRect(
-			this.x * this.size,
-			this.y * this.size,
-			this.size,
-			this.size
-		);
+		ctx.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
 	}
 }
 export default Cell;

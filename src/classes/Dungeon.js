@@ -24,13 +24,7 @@ class Dungeon {
 
 			// const loot = this.getRandomLoot();
 			// cellSize, roomSize, lootCount, dungeonWidth, dungeonHeight
-			const room = new Room(
-				this.cellSize,
-				this.roomSize,
-				this.lootCount,
-				this.width,
-				this.height
-			);
+			const room = new Room(this.cellSize, this.roomSize, this.lootCount, this.width, this.height);
 			room.cutRoom();
 			let attempts = 10;
 			// console.log("room", room);
@@ -103,77 +97,113 @@ class Dungeon {
 	getRandomLoot() {
 		// Случайное количество лута для комнаты, колеблется вокруг основного параметра.
 		const fluctuation = Math.floor(this.lootCount * 0.2); // +/- 20% от общего
-		return (
-			this.lootCount / this.roomCount +
-			(Math.random() * fluctuation - fluctuation / 2)
-		);
+		return this.lootCount / this.roomCount + (Math.random() * fluctuation - fluctuation / 2);
 	}
 	isCoordClose(coord1, coord2, distance = 1) {
-		if (
-			(coord1.x + distance == coord2.x ||
-				coord1.x - distance == coord2.x) &&
-			coord1.y == coord2.y
-		) {
+		// console.log("isCoordClose", coord1, coord2, distance);
+		if ((coord1.x + distance == coord2.x || coord1.x - distance == coord2.x) && coord1.y == coord2.y) {
 			return true;
 		}
-		if (
-			(coord1.y + distance == coord2.y ||
-				coord1.y - distance == coord2.y) &&
-			coord1.x == coord2.x
-		) {
+		if ((coord1.y + distance == coord2.y || coord1.y - distance == coord2.y) && coord1.x == coord2.x) {
 			return true;
 		}
 
 		return false;
 	}
 	createDoors() {
-		for (let i = 0; i < this.rooms.length; i++) {
-			const room1 = this.rooms[i];
+		const closestRooms = [];
+		for (let r1Indx = 0; r1Indx < this.rooms.length; r1Indx++) {
+			const room1 = this.rooms[r1Indx];
 			const room1Cells = room1.getRoomCells();
 
-			for (let j = i + 1; j < this.rooms.length; j++) {
-				const room2 = this.rooms[j];
+			for (let r2Indx = r1Indx + 1; r2Indx < this.rooms.length; r2Indx++) {
+				const room2 = this.rooms[r2Indx];
 				const room2Cells = room2.getRoomCells();
-				// let minDistance = Infinity;
-				// let closestCell1 = null;
-				// let closestCell2 = null;
-				const closestCells = [];
-
-				for (let rowCell1 of room1Cells) {
-					for (let rowCell2 of room2Cells) {
-						if (rowCell1 == undefined || rowCell2 == undefined)
-							continue;
-						for (let cell1 of rowCell1) {
-							for (let cell2 of rowCell2) {
-								if (cell1 == undefined || cell2 == undefined)
-									continue;
-								console.log(`cell1: ${cell1.x}, ${cell1.y}`);
-								console.log(`cell2: ${cell2.x}, ${cell2.y}`);
-								if (this.isCoordClose(cell1, cell2)) {
-									closestCells.push([
-										cell1,
-										cell2,
-										room1,
-										room2,
-									]);
+				// console.log(room1Cells);
+				let closestCells = [];
+				for (let r1cY = 0; r1cY < room1Cells.length; r1cY++) {
+					if (room1Cells[r1cY] == undefined) {
+						continue;
+					}
+					for (let r1cX = 0; r1cX < room1Cells[r1cY].length; r1cX++) {
+						for (let r2cY = 0; r2cY < room2Cells.length; r2cY++) {
+							if (room2Cells[r2cY] == undefined) {
+								continue;
+							}
+							for (let r2cX = 0; r2cX < room2Cells[r2cY].length; r2cX++) {
+								if (
+									room1Cells[r1cY][r1cX] !== undefined &&
+									room2Cells[r2cY][r2cX] !== undefined &&
+									this.isCoordClose(room1Cells[r1cY][r1cX], room2Cells[r2cY][r2cX])
+								) {
+									closestCells.push([room1Cells[r1cY][r1cX], room2Cells[r2cY][r2cX]]);
 								}
 							}
 						}
 					}
 				}
-
 				if (closestCells.length > 0) {
+					closestRooms.push({
+						room1: r1Indx,
+						room2: r2Indx,
+						closestCells: closestCells,
+					});
 				}
-
-				// if (closestCell1 && closestCell2) {
-				// 	closestCells.push([closestCell1, closestCell2]);
-				// }
 			}
 		}
+		// console.log(this.rooms);
+		for (let item of closestRooms) {
+			// console.log(item);
 
-		console.log("closestCells", closestCells);
+			let sliceMod = Math.floor(Math.random() * 10) + 1;
+			if (sliceMod === 1) {
+				for (let i = 0; i < item.closestCells.length; i++) {
+					const newMods = this.removeModsForClosestCells(item.closestCells[i][0], item.closestCells[i][1]);
+					this.rooms[item.room1].cells[item.closestCells[i][0].y][item.closestCells[i][0].x].mod = newMods[0];
+					this.rooms[item.room2].cells[item.closestCells[i][1].y][item.closestCells[i][1].x].mod = newMods[1];
+				}
+			} else if (sliceMod === 10) {
+				continue;
+			} else if (sliceMod >= 2) {
+				let rndGroup = Math.floor(Math.random() * item.closestCells.length);
+				const newMods = this.removeModsForClosestCells(
+					item.closestCells[rndGroup][0],
+					item.closestCells[rndGroup][1]
+				);
+				this.rooms[item.room1].cells[item.closestCells[rndGroup][0].y][item.closestCells[rndGroup][0].x].mod =
+					newMods[0];
+				this.rooms[item.room2].cells[item.closestCells[rndGroup][1].y][item.closestCells[rndGroup][1].x].mod =
+					newMods[1];
+			}
+		}
+		// console.log("closestCells", closestCells);
 	}
+	removeModsForClosestCells(cell1, cell2) {
+		console.log(cell1.mod, cell2.mod);
 
+		if (cell1.mod.includes("wall-top") && cell2.mod.includes("wall-bottom") && cell1.x === cell2.x) {
+			cell1.removeMod("wall-top");
+			cell2.removeMod("wall-bottom");
+		}
+
+		if (cell1.mod.includes("wall-bottom") && cell2.mod.includes("wall-top") && cell1.x === cell2.x) {
+			cell1.removeMod("wall-bottom");
+			cell2.removeMod("wall-top");
+		}
+
+		if (cell1.mod.includes("wall-left") && cell2.mod.includes("wall-right") && cell1.y === cell2.y) {
+			cell1.removeMod("wall-left");
+			cell2.removeMod("wall-right");
+		}
+
+		if (cell1.mod.includes("wall-right") && cell2.mod.includes("wall-left") && cell1.y === cell2.y) {
+			cell1.removeMod("wall-right");
+			cell2.removeMod("wall-left");
+		}
+		console.log(cell1.mod, cell2.mod);
+
+		return [cell1.mod, cell2.mod];
+	}
 	placeRooms() {
 		this.generateRooms();
 		this.createDoors();
