@@ -69,17 +69,8 @@ const CanvasComponent = ({ settings }) => {
 
 			cellRow.forEach((cell) => {
 				if (cell.type === "floor" || cell.type === "room") {
-					const img =
-						dungeonFloorTiles[
-							Math.floor(Math.random() * dungeonFloorTiles.length)
-						];
-					ctx.drawImage(
-						img,
-						cell.x * dungeon.cellSize,
-						cell.y * dungeon.cellSize,
-						defSize,
-						defSize
-					);
+					const img = dungeonFloorTiles[Math.floor(Math.random() * dungeonFloorTiles.length)];
+					ctx.drawImage(img, cell.x * dungeon.cellSize, cell.y * dungeon.cellSize, defSize, defSize);
 				}
 				const wallSize = 4;
 				if (cell.mod.includes("wall-left")) {
@@ -116,6 +107,42 @@ const CanvasComponent = ({ settings }) => {
 						(cell.y + 1) * dungeon.cellSize - wallSize / 2,
 						dungeon.cellSize,
 						wallSize
+					);
+				}
+				if (cell.mod.includes("door-top")) {
+					ctx.fillStyle = "brown";
+					ctx.fillRect(
+						cell.x * dungeon.cellSize,
+						cell.y * dungeon.cellSize - wallSize / 2,
+						dungeon.cellSize,
+						wallSize
+					);
+				}
+				if (cell.mod.includes("door-bottom")) {
+					ctx.fillStyle = "brown";
+					ctx.fillRect(
+						cell.x * dungeon.cellSize,
+						(cell.y + 1) * dungeon.cellSize - wallSize / 2,
+						dungeon.cellSize,
+						wallSize
+					);
+				}
+				if (cell.mod.includes("door-left")) {
+					ctx.fillStyle = "brown";
+					ctx.fillRect(
+						cell.x * dungeon.cellSize - wallSize / 2,
+						cell.y * dungeon.cellSize,
+						wallSize,
+						dungeon.cellSize
+					);
+				}
+				if (cell.mod.includes("door-right")) {
+					ctx.fillStyle = "brown";
+					ctx.fillRect(
+						(cell.x + 1) * dungeon.cellSize - wallSize / 2,
+						cell.y * dungeon.cellSize,
+						wallSize,
+						dungeon.cellSize
 					);
 				}
 			});
@@ -198,9 +225,7 @@ const CanvasComponent = ({ settings }) => {
 			<button onClick={drawSheet}>Draw Sheet</button>
 
 			<button onClick={toggleGameMode}>Toggle Game Mode</button>
-			<button onClick={() => dungeon.rooms[0].findPosition()}>
-				test
-			</button>
+			<button onClick={() => dungeon.rooms[0].findPosition()}>test</button>
 		</div>
 	);
 };

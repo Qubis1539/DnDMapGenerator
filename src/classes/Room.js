@@ -38,7 +38,27 @@ class Room {
 
 		this.calcRoomCells();
 	}
-
+	getRandomOutermostCell() {
+		let sX, sY;
+		let rnd = Math.floor(Math.random() * 4);
+		if (rnd === 0) {
+			sX = Math.floor(Math.random() * this.width);
+			sY = this.y;
+		}
+		if (rnd === 1) {
+			sX = this.x;
+			sY = Math.floor(Math.random() * this.height);
+		}
+		if (rnd === 2) {
+			sX = Math.floor(Math.random() * this.width);
+			sY = this.y + this.height - 1;
+		}
+		if (rnd === 3) {
+			sX = this.x + this.width - 1;
+			sY = Math.floor(Math.random() * this.height);
+		}
+		return { x: sX, y: sY };
+	}
 	findPosition() {
 		let x = Math.floor(Math.random() * (this.mapWidth - this.width));
 		let y = Math.floor(Math.random() * (this.mapHeight - this.height));

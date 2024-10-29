@@ -12,7 +12,7 @@ class Cell {
 
 	removeMod(mod) {
 		if (!this.mod.includes(mod)) return;
-		this.mod.splice(this.mod.indexOf(mod), 1);
+		return this.mod.splice(this.mod.indexOf(mod), 1);
 	}
 	setType(type) {
 		this.type = type;
