@@ -42,20 +42,20 @@ class Room {
 		let sX, sY;
 		let rnd = Math.floor(Math.random() * 4);
 		if (rnd === 0) {
-			sX = Math.floor(Math.random() * this.width);
+			sX = Math.floor(Math.random() * this.width) + this.x;
 			sY = this.y;
 		}
 		if (rnd === 1) {
 			sX = this.x;
-			sY = Math.floor(Math.random() * this.height);
+			sY = Math.floor(Math.random() * this.height) + this.y;
 		}
 		if (rnd === 2) {
-			sX = Math.floor(Math.random() * this.width);
+			sX = Math.floor(Math.random() * this.width) + this.x;
 			sY = this.y + this.height - 1;
 		}
 		if (rnd === 3) {
 			sX = this.x + this.width - 1;
-			sY = Math.floor(Math.random() * this.height);
+			sY = Math.floor(Math.random() * this.height) + this.y;
 		}
 		return { x: sX, y: sY };
 	}

@@ -9,6 +9,21 @@ class Cell {
 		if (this.mod.includes(mod)) return;
 		this.mod.push(mod);
 	}
+	isCollide(target) {
+		return this.x === target.x && this.y === target.y;
+	}
+	isCollidedList(list) {
+		for (let item of list) {
+			for (let row of list) {
+				for (let cell of row) {
+					if (this.x === cell.x && this.y === cell.y) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
 
 	removeMod(mod) {
 		if (!this.mod.includes(mod)) return;

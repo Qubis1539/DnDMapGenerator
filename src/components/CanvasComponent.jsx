@@ -1,9 +1,31 @@
 import React, { useRef, useEffect, useState } from "react";
-import brick1 from "../assets/sprites/dungeon/floor/Bricks1.png";
-import brick2 from "../assets/sprites/dungeon/floor/Bricks2.png";
-import brick3 from "../assets/sprites/dungeon/floor/Bricks3.png";
-import brick4 from "../assets/sprites/dungeon/floor/Bricks4.png";
-import brick1v1 from "../assets/sprites/dungeon/floor/Brick1V1.png";
+// import brick1 from "../assets/sprites/dungeon/floor/Bricks1.png";
+// import brick2 from "../assets/sprites/dungeon/floor/Bricks2.png";
+// import brick3 from "../assets/sprites/dungeon/floor/Bricks3.png";
+// import brick4 from "../assets/sprites/dungeon/floor/Bricks4.png";
+import floor1 from "../assets/sprites/dungeon/floor/floor1.png";
+import floor2 from "../assets/sprites/dungeon/floor/floor2.png";
+import floor3 from "../assets/sprites/dungeon/floor/floor3.png";
+import floorTile1 from "../assets/sprites/dungeon/floor/floorTile1.png";
+import floorTile2 from "../assets/sprites/dungeon/floor/floorTile2.png";
+import floorTile3 from "../assets/sprites/dungeon/floor/floorTile3.png";
+import floorTile4 from "../assets/sprites/dungeon/floor/floorTile4.png";
+import floorTile5 from "../assets/sprites/dungeon/floor/floorTile5.png";
+import floorTile6 from "../assets/sprites/dungeon/floor/floorTile6.png";
+import floorTile7 from "../assets/sprites/dungeon/floor/floorTile7.png";
+import floorTile8 from "../assets/sprites/dungeon/floor/floorTile8.png";
+import floorTile9 from "../assets/sprites/dungeon/floor/floorTile9.png";
+import floorTile10 from "../assets/sprites/dungeon/floor/floorTile10.png";
+import floorTile11 from "../assets/sprites/dungeon/floor/floorTile11.png";
+import floorTile12 from "../assets/sprites/dungeon/floor/floorTile12.png";
+import floorTile13 from "../assets/sprites/dungeon/floor/floorTile13.png";
+import floorTile14 from "../assets/sprites/dungeon/floor/floorTile14.png";
+import floorTile15 from "../assets/sprites/dungeon/floor/floorTile15.png";
+import floorTile16 from "../assets/sprites/dungeon/floor/floorTile16.png";
+import floorTile17 from "../assets/sprites/dungeon/floor/floorTile17.png";
+import floorTile18 from "../assets/sprites/dungeon/floor/floorTile18.png";
+// import floorTile19 from "../assets/sprites/dungeon/floor/floorTile19.png";
+
 import Dungeon from "../classes/Dungeon.js";
 import { log } from "three/webgpu";
 
@@ -26,7 +48,24 @@ const CanvasComponent = ({ settings }) => {
 	const loadImagesFrom = () => {
 		// Загрузка изображений пола
 		// brick1, brick2, brick3, brick4
-		const images = [brick1, brick2, brick3, brick4];
+		const images = [
+			// floor1,
+			// floor2,
+			// floor3,
+			// floorTile7,
+			// floorTile8,
+			// floorTile9,
+			// ---------------
+			floorTile10,
+			floorTile11,
+			floorTile12,
+			floorTile13,
+			floorTile14,
+			floorTile15,
+			floorTile16,
+			floorTile17,
+			floorTile18,
+		];
 		const loadedImages = [];
 
 		images.forEach((src, index) => {
@@ -44,6 +83,7 @@ const CanvasComponent = ({ settings }) => {
 		const canvas = canvasRef.current;
 		const ctx = canvas.getContext("2d");
 		ctx.strokeStyle = "red";
+		ctx.lineWidth = 1;
 		for (let y = 0; y < HEIGHT / defSize; y++) {
 			for (let x = 0; x < WIDTH / defSize; x++) {
 				ctx.strokeRect(x * defSize, y * defSize, defSize, defSize);
@@ -56,61 +96,50 @@ const CanvasComponent = ({ settings }) => {
 		const canvas = canvasRef.current;
 		const ctx = canvas.getContext("2d");
 
+		// settings
+		const wallSize = 16;
+		const cornerScale = 1.5;
+		const wallBorderSize = 3;
+		const wallColor = "#444444";
+		const wallBorderColor = "#111111";
+		const cornerBorderSize = 7;
+		const doorColor = "#291700";
 		// Очистка Canvas
 		ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
 		// Рендер подземелья
-		// dungeon.render(ctx);
 		const dungeonCells = dungeon.render();
-		// console.log(dungeonCells);
 
+		// Рендер пола
 		dungeonCells.forEach((cellRow) => {
 			// console.log(cell);
 
 			cellRow.forEach((cell) => {
-				if (cell.type === "floor" || cell.type === "room") {
+				if (cell.type === "floor" || cell.type === "room" || cell.type === "corridor") {
 					const img = dungeonFloorTiles[Math.floor(Math.random() * dungeonFloorTiles.length)];
-					ctx.drawImage(img, cell.x * dungeon.cellSize, cell.y * dungeon.cellSize, defSize, defSize);
-				}
-				const wallSize = 4;
-				if (cell.mod.includes("wall-left")) {
-					ctx.fillStyle = "gray";
-					ctx.fillRect(
-						cell.x * dungeon.cellSize - wallSize / 2,
+					// let ang = Math.floor(Math.random() * 2);
+					// ctx.rotate(ang * (Math.PI / 2));
+					// console.log(ang);
+					ctx.drawImage(
+						img,
+						cell.x * dungeon.cellSize,
 						cell.y * dungeon.cellSize,
-						wallSize,
+						dungeon.cellSize,
 						dungeon.cellSize
 					);
 				}
-				if (cell.mod.includes("wall-top")) {
-					ctx.fillStyle = "gray";
-					ctx.fillRect(
-						cell.x * dungeon.cellSize,
-						cell.y * dungeon.cellSize - wallSize / 2,
-						dungeon.cellSize,
-						wallSize
-					);
-				}
-				if (cell.mod.includes("wall-right")) {
-					ctx.fillStyle = "gray";
-					ctx.fillRect(
-						(cell.x + 1) * dungeon.cellSize - wallSize / 2,
-						cell.y * dungeon.cellSize,
-						wallSize,
-						dungeon.cellSize
-					);
-				}
-				if (cell.mod.includes("wall-bottom")) {
-					ctx.fillStyle = "gray";
-					ctx.fillRect(
-						cell.x * dungeon.cellSize,
-						(cell.y + 1) * dungeon.cellSize - wallSize / 2,
-						dungeon.cellSize,
-						wallSize
-					);
-				}
+
+				// walls ----------------------------------------------
+
+				// end ------------------------------------------------------
+			});
+		});
+		// Рендер дверей
+		dungeonCells.forEach((cellRow) => {
+			cellRow.forEach((cell) => {
+				// doors -------------------------------------------------
 				if (cell.mod.includes("door-top")) {
-					ctx.fillStyle = "brown";
+					ctx.fillStyle = doorColor;
 					ctx.fillRect(
 						cell.x * dungeon.cellSize,
 						cell.y * dungeon.cellSize - wallSize / 2,
@@ -119,7 +148,7 @@ const CanvasComponent = ({ settings }) => {
 					);
 				}
 				if (cell.mod.includes("door-bottom")) {
-					ctx.fillStyle = "brown";
+					ctx.fillStyle = doorColor;
 					ctx.fillRect(
 						cell.x * dungeon.cellSize,
 						(cell.y + 1) * dungeon.cellSize - wallSize / 2,
@@ -128,7 +157,7 @@ const CanvasComponent = ({ settings }) => {
 					);
 				}
 				if (cell.mod.includes("door-left")) {
-					ctx.fillStyle = "brown";
+					ctx.fillStyle = doorColor;
 					ctx.fillRect(
 						cell.x * dungeon.cellSize - wallSize / 2,
 						cell.y * dungeon.cellSize,
@@ -137,7 +166,7 @@ const CanvasComponent = ({ settings }) => {
 					);
 				}
 				if (cell.mod.includes("door-right")) {
-					ctx.fillStyle = "brown";
+					ctx.fillStyle = doorColor;
 					ctx.fillRect(
 						(cell.x + 1) * dungeon.cellSize - wallSize / 2,
 						cell.y * dungeon.cellSize,
@@ -147,22 +176,163 @@ const CanvasComponent = ({ settings }) => {
 				}
 			});
 		});
-		// dungeonCells.forEach((cellRow) => {
-		// 	for (let i = 0; i < cellRow.length; i++) {
-		// 		if (cellRow[i].type === "room") {
-		// 			if (i == 0) {
-		// 				console.log(i);
-		// 				ctx.fillStyle = "white";
-		// 				ctx.fillRect(
-		// 					cellRow[i].x * dungeon.cellSize,
-		// 					cellRow[i].y * dungeon.cellSize,
-		// 					defSize,
-		// 					defSize
-		// 				);
-		// 			}
-		// 		}
-		// 	}
-		// });
+		// Рендер стен
+		dungeonCells.forEach((cellRow) => {
+			cellRow.forEach((cell) => {
+				if (cell.mod.includes("wall-left")) {
+					ctx.fillStyle = wallColor;
+					ctx.fillRect(
+						cell.x * dungeon.cellSize - wallSize / 2,
+						cell.y * dungeon.cellSize,
+						wallSize,
+						dungeon.cellSize
+					);
+					for (let i = 0; i < 2; i++) {
+						ctx.strokeStyle = wallBorderColor;
+						ctx.lineWidth = wallBorderSize;
+						ctx.strokeRect(
+							cell.x * dungeon.cellSize - wallSize / 2,
+							cell.y * dungeon.cellSize + (dungeon.cellSize * i) / 2,
+							wallSize,
+							dungeon.cellSize / 2
+						);
+					}
+				}
+				if (cell.mod.includes("wall-top")) {
+					ctx.fillStyle = wallColor;
+					ctx.fillRect(
+						cell.x * dungeon.cellSize,
+						cell.y * dungeon.cellSize - wallSize / 2,
+						dungeon.cellSize,
+						wallSize
+					);
+					for (let i = 0; i < 2; i++) {
+						ctx.strokeStyle = wallBorderColor;
+						ctx.lineWidth = wallBorderSize;
+						ctx.strokeRect(
+							cell.x * dungeon.cellSize + (dungeon.cellSize * i) / 2,
+							cell.y * dungeon.cellSize - wallSize / 2,
+							dungeon.cellSize / 2,
+							wallSize
+						);
+					}
+				}
+				if (cell.mod.includes("wall-right")) {
+					ctx.fillStyle = wallColor;
+					ctx.fillRect(
+						(cell.x + 1) * dungeon.cellSize - wallSize / 2,
+						cell.y * dungeon.cellSize,
+						wallSize,
+						dungeon.cellSize
+					);
+					for (let i = 0; i < 2; i++) {
+						ctx.strokeStyle = wallBorderColor;
+						ctx.lineWidth = wallBorderSize;
+						ctx.strokeRect(
+							(cell.x + 1) * dungeon.cellSize - wallSize / 2,
+							cell.y * dungeon.cellSize + (dungeon.cellSize * i) / 2,
+							wallSize,
+							dungeon.cellSize / 2
+						);
+					}
+				}
+				if (cell.mod.includes("wall-bottom")) {
+					ctx.fillStyle = wallColor;
+					ctx.fillRect(
+						cell.x * dungeon.cellSize,
+						(cell.y + 1) * dungeon.cellSize - wallSize / 2,
+						dungeon.cellSize,
+						wallSize
+					);
+					for (let i = 0; i < 2; i++) {
+						ctx.strokeStyle = wallBorderColor;
+						ctx.lineWidth = wallBorderSize;
+						ctx.strokeRect(
+							cell.x * dungeon.cellSize + (dungeon.cellSize * i) / 2,
+							(cell.y + 1) * dungeon.cellSize - wallSize / 2,
+							dungeon.cellSize / 2,
+							wallSize
+						);
+					}
+				}
+			});
+		});
+		// Рендер углов
+		dungeonCells.forEach((cellRow) => {
+			cellRow.forEach((cell) => {
+				if (cell.mod.includes("wall-top") && cell.mod.includes("wall-left")) {
+					ctx.fillStyle = wallColor;
+					ctx.fillRect(
+						cell.x * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						cell.y * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						wallSize * cornerScale,
+						wallSize * cornerScale
+					);
+					ctx.strokeStyle = wallBorderColor;
+					ctx.lineWidth = cornerBorderSize;
+					ctx.strokeRect(
+						cell.x * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						cell.y * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						wallSize * cornerScale,
+						wallSize * cornerScale
+					);
+				}
+
+				if (cell.mod.includes("wall-top") && cell.mod.includes("wall-right")) {
+					ctx.fillStyle = wallColor;
+					ctx.fillRect(
+						(cell.x + 1) * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						cell.y * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						wallSize * cornerScale,
+						wallSize * cornerScale
+					);
+					ctx.strokeStyle = wallBorderColor;
+					ctx.lineWidth = cornerBorderSize;
+					ctx.strokeRect(
+						(cell.x + 1) * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						cell.y * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						wallSize * cornerScale,
+						wallSize * cornerScale
+					);
+				}
+
+				if (cell.mod.includes("wall-bottom") && cell.mod.includes("wall-left")) {
+					ctx.fillStyle = wallColor;
+					ctx.fillRect(
+						cell.x * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						(cell.y + 1) * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						wallSize * cornerScale,
+						wallSize * cornerScale
+					);
+					ctx.strokeStyle = wallBorderColor;
+					ctx.lineWidth = cornerBorderSize;
+					ctx.strokeRect(
+						cell.x * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						(cell.y + 1) * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						wallSize * cornerScale,
+						wallSize * cornerScale
+					);
+				}
+
+				if (cell.mod.includes("wall-bottom") && cell.mod.includes("wall-right")) {
+					ctx.fillStyle = wallColor;
+					ctx.fillRect(
+						(cell.x + 1) * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						(cell.y + 1) * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						wallSize * cornerScale,
+						wallSize * cornerScale
+					);
+					ctx.strokeStyle = wallBorderColor;
+					ctx.lineWidth = cornerBorderSize;
+					ctx.strokeRect(
+						(cell.x + 1) * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						(cell.y + 1) * dungeon.cellSize - (wallSize * cornerScale) / 2,
+						wallSize * cornerScale,
+						wallSize * cornerScale
+					);
+				}
+			});
+		});
 	};
 
 	const getMap = () => {

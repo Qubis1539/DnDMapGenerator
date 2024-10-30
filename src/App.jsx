@@ -36,7 +36,7 @@ function App() {
 			},
 			dungeon: {
 				lootCount: 10,
-				roomCount: 12,
+				roomCount: 3,
 				roomSize: 6,
 			},
 		},

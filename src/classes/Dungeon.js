@@ -1,7 +1,7 @@
 import Room from "./Room.js";
 import Cell from "./Cell.js";
 import Corridor from "./Corridor.js";
-import { log } from "three/webgpu";
+import { log, log2 } from "three/webgpu";
 class Dungeon {
 	constructor(cellSize, width, height, roomSize, roomCount, lootCount) {
 		this.cellSize = cellSize;
@@ -142,6 +142,34 @@ class Dungeon {
 					newMods[1];
 			}
 		}
+
+		// for (let corridorIndx in this.corridors) {
+		// 	const corridor = this.corridors[corridorIndx];
+		// 	for (let corridorCellIndx in corridor.cells) {
+		// 		const corridorCell = corridor.cells[corridorCellIndx];
+		// 		for (let roomIndx in this.rooms) {
+		// 			const room = this.rooms[roomIndx];
+
+		// 			for (let cellRowIndx in room.cells) {
+		// 				const cellRow = room.cells[cellRowIndx];
+		// 				for (let cellIndx in cellRow) {
+		// 					const cell = cellRow[cellIndx];
+		// 					if (this.isCoordClose(cell, corridorCell)) {
+		// 						if (
+		// 							(corridorCell.x === corridor.startX && corridorCell.y === corridor.startY) ||
+		// 							(corridorCell.x === corridor.endX && corridorCell.y === corridor.endY)
+		// 						) {
+		// 							console.log(cell, corridorCell);
+		// 							let res = this.removeModsForClosestCells(cell, corridorCell, true);
+		// 							this.rooms[roomIndx].cells[cellRowIndx][cellIndx].mod = res[0];
+		// 							this.corridors[corridorIndx].cells[corridorCellIndx].mod = res[1];
+		// 						}
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 		// console.log("closestCells", closestCells);
 	}
 	removeModsForClosestCells(cell1, cell2, addDoors = false) {
@@ -169,41 +197,47 @@ class Dungeon {
 		}
 		// console.log(cell1.mod, cell2.mod);
 		if (addDoors) {
-			return this.addDoors(cell1, removedMods[0], cell2, removedMods[1]);
+			return this.addDoors(cell1, removedMods[0], cell2, removedMods[1]); // разобрать почему он перестаёт ставить двери
 		}
 		return [cell1.mod, cell2.mod];
 	}
+
 	addDoors(cell1, mod1, cell2, mod2) {
-		if (mod1.includes("wall-top") && mod2.includes("wall-bottom")) {
-			cell1.mod.push("door-top");
-			cell2.mod.push("door-bottom");
+		if (mod1.includes("wall-top") || mod2.includes("wall-bottom")) {
+			cell1.addMod("door-top");
+			cell2.addMod("door-bottom");
 		}
-		if (mod1.includes("wall-bottom") && mod2.includes("wall-top")) {
-			cell1.mod.push("door-bottom");
-			cell2.mod.push("door-top");
+		if (mod1.includes("wall-bottom") || mod2.includes("wall-top")) {
+			cell1.addMod("door-bottom");
+			cell2.addMod("door-top");
 		}
-		if (mod1.includes("wall-left") && mod2.includes("wall-right")) {
-			cell1.mod.push("door-left");
-			cell2.mod.push("door-right");
+		if (mod1.includes("wall-left") || mod2.includes("wall-right")) {
+			cell1.addMod("door-left");
+			cell2.addMod("door-right");
 		}
-		if (mod1.includes("wall-right") && mod2.includes("wall-left")) {
-			cell1.mod.push("door-right");
-			cell2.mod.push("door-left");
+		if (mod1.includes("wall-right") || mod2.includes("wall-left")) {
+			cell1.addMod("door-right");
+			cell2.addMod("door-left");
 		}
 		return [cell1.mod, cell2.mod];
 	}
 	createCorridors() {
-		this.rooms.forEach((room) => {
-			let startCoord = room.getRandomOutermostCell();
-			const newCorridor = new Corridor(startCoord.x, startCoord.y, 10, this.width, this.height);
-			newCorridor.moveTo(this.rooms[Math.floor(Math.random() * this.rooms.length)].getRandomOutermostCell());
-			this.corridors.push(newCorridor);
-		});
+		// this.rooms.forEach((room) => {
+		const room = this.rooms[0];
+		let startCoord = room.getRandomOutermostCell();
+		let endCoord = this.rooms[1];
+		// let endCoord = this.rooms[Math.floor(Math.random() * this.rooms.length)];
+		const newCorridor = new Corridor(startCoord.x, startCoord.y, 40, this.width, this.height, room.id, endCoord.id);
+		newCorridor.moveTo(endCoord.getRandomOutermostCell(), this.rooms);
+		// newCorridor.moveTo(this.rooms[1]);
+		this.corridors.push(newCorridor);
+		// console.log(room, this.rooms[1]);
+		// });
 	}
 	placeRooms() {
 		this.generateRooms();
+		// this.createCorridors();
 		this.createDoors();
-		this.createCorridors();
 		// Логика размещения комнат, с учетом размещения друг относительно друга и стен.
 	}
 
