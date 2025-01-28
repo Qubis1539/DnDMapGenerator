@@ -34,11 +34,7 @@ const ThreeScene = ({ size }) => {
 				const square2d = new THREE.PlaneGeometry(cubeSize, cubeSize);
 				const cube2d = new THREE.Mesh(square2d, material);
 
-				cube2d.position.set(
-					startPosX + i * cubeSize + i,
-					startPosY - j * cubeSize - j,
-					0
-				);
+				cube2d.position.set(startPosX + i * cubeSize + i, startPosY - j * cubeSize - j, 0);
 				sheet[i].push(cube2d);
 				scene.add(cube2d);
 			}

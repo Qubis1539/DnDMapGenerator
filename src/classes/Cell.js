@@ -4,6 +4,8 @@ class Cell {
 		this.y = y;
 		this.type = type; // тип клетки ('floor', 'wall', 'door', и т.д.)
 		this.mod = mod; // модификатор клетки
+		this.width = 1;
+		this.height = 1;
 	}
 	addMod(mod) {
 		if (this.mod.includes(mod)) return;
@@ -13,16 +15,7 @@ class Cell {
 		return this.x === target.x && this.y === target.y;
 	}
 	isCollidedList(list) {
-		for (let item of list) {
-			for (let row of list) {
-				for (let cell of row) {
-					if (this.x === cell.x && this.y === cell.y) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
+		return list.some((row) => row.some((cell) => this.x === cell.x && this.y === cell.y));
 	}
 
 	removeMod(mod) {
