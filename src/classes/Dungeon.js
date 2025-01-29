@@ -14,6 +14,11 @@ class Dungeon {
 		this.rooms = [];
 		this.loot = [];
 		this.corridors = [];
+
+		this.clickEvent = false;
+	}
+	getCell(x, y) {
+		return this.cells[y][x];
 	}
 	findValidPosition(room, maxAttempts = 10) {
 		let attempts = maxAttempts;
@@ -209,18 +214,100 @@ class Dungeon {
 		// this.rooms.forEach((room) => {
 		const room = this.rooms[0];
 		let startCoord = room.getRandomOutermostCell();
-		let endCoord = this.rooms[1];
-		// let endCoord = this.rooms[Math.floor(Math.random() * this.rooms.length)];
-		const newCorridor = new Corridor(startCoord.x, startCoord.y, 40, this.width, this.height, room.id, endCoord.id);
-		newCorridor.moveTo(endCoord.getRandomOutermostCell(), this.rooms);
-		// newCorridor.moveTo(this.rooms[1]);
-		this.corridors.push(newCorridor);
+		// let endCoord = this.rooms[1];
+		let endCoord = rooms[1].getRandomOutermostCell();
+		// const newCorridor = new Corridor(startCoord.x, startCoord.y, 40, this.width, this.height, room.id, endCoord.id);
+		// newCorridor.moveTo(endCoord.getRandomOutermostCell(), this.rooms);
+		// // newCorridor.moveTo(this.rooms[1]);
+		// this.corridors.push(newCorridor);
+		this.pathFinder(startCoord, endCoord);
 		// console.log(room, this.rooms[1]);
 		// });
 	}
+	pathFinder(start, end) {
+		const openSet = [];
+		const closedSet = new Set();
+		const cameFrom = {};
+		const gScore = new Map();
+		const fScore = new Map();
+
+		openSet.push(start);
+		gScore.set(JSON.stringify(start), 0);
+		fScore.set(JSON.stringify(start), this.heuristic(start, end));
+
+		while (openSet.length > 0) {
+			openSet.sort((a, b) => fScore.get(JSON.stringify(a)) - fScore.get(JSON.stringify(b)));
+			const current = openSet.shift();
+
+			if (current.x === end.x && current.y === end.y) {
+				return this.reconstructPath(cameFrom, current);
+			}
+
+			closedSet.add(JSON.stringify(current));
+
+			const neighbors = this.getNeighbors(current);
+			for (const neighbor of neighbors) {
+				if (closedSet.has(JSON.stringify(neighbor))) continue;
+
+				const tentativeGScore = gScore.get(JSON.stringify(current)) + 1;
+
+				if (!gScore.has(JSON.stringify(neighbor)) || tentativeGScore < gScore.get(JSON.stringify(neighbor))) {
+					cameFrom[JSON.stringify(neighbor)] = current;
+					gScore.set(JSON.stringify(neighbor), tentativeGScore);
+					fScore.set(JSON.stringify(neighbor), tentativeGScore + this.heuristic(neighbor, end));
+
+					if (!openSet.some((n) => n.x === neighbor.x && n.y === neighbor.y)) {
+						openSet.push(neighbor);
+					}
+				}
+			}
+		}
+
+		return null; // Путь не найден
+	}
+
+	heuristic(a, b) {
+		return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+	}
+
+	reconstructPath(cameFrom, current) {
+		const totalPath = [current];
+		while (cameFrom[JSON.stringify(current)]) {
+			current = cameFrom[JSON.stringify(current)];
+			totalPath.unshift(current);
+		}
+		return totalPath;
+	}
+
+	getNeighbors(node) {
+		const directions = [
+			{ x: 0, y: -1 }, // Up
+			{ x: 0, y: 1 }, // Down
+			{ x: -1, y: 0 }, // Left
+			{ x: 1, y: 0 }, // Right
+		];
+
+		const neighbors = [];
+		for (const direction of directions) {
+			const neighbor = {
+				x: node.x + direction.x,
+				y: node.y + direction.y,
+			};
+			if (
+				neighbor.x >= 0 &&
+				neighbor.x < this.width &&
+				neighbor.y >= 0 &&
+				neighbor.y < this.height &&
+				this.grid[neighbor.y][neighbor.x] === 0
+			) {
+				neighbors.push(neighbor);
+			}
+		}
+		return neighbors;
+	}
 	placeRooms() {
 		this.generateRooms();
-		// this.createCorridors();
+		this.pathFinder();
 		this.createDoors();
 		// Логика размещения комнат, с учетом размещения друг относительно друга и стен.
 	}
@@ -262,7 +349,8 @@ class Dungeon {
 				});
 			});
 		});
-		return cells;
+		this.cells = cells;
+		return this.cells;
 	}
 }
 

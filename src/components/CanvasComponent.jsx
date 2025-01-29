@@ -364,13 +364,31 @@ const CanvasComponent = ({ settings }) => {
 	};
 	useEffect(() => {
 		loadImagesFrom();
+
 		// getMap();
 		// Загружаем карту при монтировании компонента
 	}, []);
 
 	useEffect(() => {
 		// Ререндер подземелья при обновлении dungeon
+		console.log("dungeon changed");
 		renderDefaultCells();
+
+		// Функция-обработчик клика
+		const handleClick = (e) => {
+			const x = Math.floor(e.offsetX / defSize);
+			const y = Math.floor(e.offsetY / defSize);
+			console.group("click cell");
+			console.log(x, y);
+			console.log(dungeon.getCell(x, y));
+			console.groupEnd();
+		};
+
+		canvasRef.current.addEventListener("click", handleClick);
+
+		return () => {
+			canvasRef.current.removeEventListener("click", handleClick);
+		};
 	}, [dungeon]);
 
 	return (
