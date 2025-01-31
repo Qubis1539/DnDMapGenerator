@@ -14,20 +14,30 @@ class Dungeon {
 		this.rooms = [];
 		this.loot = [];
 		this.corridors = [];
-	}
 
+		this.clickEvent = false;
+	}
+	getCell(x, y) {
+		return this.cells[y][x];
+	}
+	findValidPosition(room, maxAttempts = 10) {
+		let attempts = maxAttempts;
+		while (attempts > 0) {
+			room.findPosition();
+			if (!this.isCollideList(room, this.rooms)) {
+				return true;
+			}
+			attempts--;
+		}
+		return false;
+	}
 	generateRooms() {
 		let roomGenerateAttempts = 10;
 		while (this.rooms.length < this.roomCount && roomGenerateAttempts > 0) {
 			const room = new Room(this.cellSize, this.roomSize, this.lootCount, this.width, this.height);
 			room.cutRoom();
-			let attempts = 10;
 
-			while (this.isCollidedList(room, this.rooms) && attempts > 0) {
-				room.findPosition();
-				attempts--;
-			}
-			if (attempts <= 0) {
+			if (!this.findValidPosition(room, 10)) {
 				roomGenerateAttempts--;
 				continue;
 			}
@@ -35,7 +45,7 @@ class Dungeon {
 			this.rooms.push(room);
 		}
 	}
-	isCollidedList(target, list) {
+	isCollideList(target, list) {
 		for (let item of list) {
 			if (this.isCollided(target, item)) {
 				return true;
@@ -76,7 +86,33 @@ class Dungeon {
 		return false;
 	}
 	createDoors() {
+		const closestRooms = this.findClosestRooms();
+
+		closestRooms.forEach((item) => {
+			const sliceMod = Math.floor(Math.random() * 10) + 1;
+
+			if (sliceMod === 1) {
+				// Создать двери для всех пар ближайших ячеек
+				item.closestCells.forEach(([cell1, cell2]) => {
+					const newMods = this.removeModsForClosestCells(cell1, cell2);
+					this.updateCellMods(item.room1, cell1, newMods[0]);
+					this.updateCellMods(item.room2, cell2, newMods[1]);
+				});
+			} else if (sliceMod >= 2 && sliceMod < 10) {
+				// Создать дверь для случайной пары ближайших ячеек
+				const rndGroup = Math.floor(Math.random() * item.closestCells.length);
+				const [cell1, cell2] = item.closestCells[rndGroup];
+				const newMods = this.removeModsForClosestCells(cell1, cell2, true); // true - добавить двери
+				this.updateCellMods(item.room1, cell1, newMods[0]);
+				this.updateCellMods(item.room2, cell2, newMods[1]);
+			}
+		});
+	}
+
+	// Находит ближайшие комнаты и сохраняет их ячейки
+	findClosestRooms() {
 		const closestRooms = [];
+
 		for (let r1Indx = 0; r1Indx < this.rooms.length; r1Indx++) {
 			const room1 = this.rooms[r1Indx];
 			const room1Cells = room1.getRoomCells();
@@ -84,94 +120,47 @@ class Dungeon {
 			for (let r2Indx = r1Indx + 1; r2Indx < this.rooms.length; r2Indx++) {
 				const room2 = this.rooms[r2Indx];
 				const room2Cells = room2.getRoomCells();
-				// console.log(room1Cells);
-				let closestCells = [];
-				for (let r1cY = 0; r1cY < room1Cells.length; r1cY++) {
-					if (room1Cells[r1cY] == undefined) {
-						continue;
-					}
-					for (let r1cX = 0; r1cX < room1Cells[r1cY].length; r1cX++) {
-						for (let r2cY = 0; r2cY < room2Cells.length; r2cY++) {
-							if (room2Cells[r2cY] == undefined) {
-								continue;
-							}
-							for (let r2cX = 0; r2cX < room2Cells[r2cY].length; r2cX++) {
-								if (
-									room1Cells[r1cY][r1cX] !== undefined &&
-									room2Cells[r2cY][r2cX] !== undefined &&
-									this.isCoordClose(room1Cells[r1cY][r1cX], room2Cells[r2cY][r2cX])
-								) {
-									closestCells.push([room1Cells[r1cY][r1cX], room2Cells[r2cY][r2cX]]);
-								}
-							}
-						}
-					}
-				}
+
+				const closestCells = this.findClosestCells(room1Cells, room2Cells);
 				if (closestCells.length > 0) {
 					closestRooms.push({
 						room1: r1Indx,
 						room2: r2Indx,
-						closestCells: closestCells,
+						closestCells,
 					});
 				}
 			}
 		}
-		// console.log(this.rooms);
-		for (let item of closestRooms) {
-			// console.log(item);
 
-			let sliceMod = Math.floor(Math.random() * 10) + 1;
-			if (sliceMod === 1) {
-				for (let i = 0; i < item.closestCells.length; i++) {
-					const newMods = this.removeModsForClosestCells(item.closestCells[i][0], item.closestCells[i][1]);
-					this.rooms[item.room1].cells[item.closestCells[i][0].y][item.closestCells[i][0].x].mod = newMods[0];
-					this.rooms[item.room2].cells[item.closestCells[i][1].y][item.closestCells[i][1].x].mod = newMods[1];
-				}
-			} else if (sliceMod === 10) {
-				continue;
-			} else if (sliceMod >= 2) {
-				let rndGroup = Math.floor(Math.random() * item.closestCells.length);
-				const newMods = this.removeModsForClosestCells(
-					item.closestCells[rndGroup][0],
-					item.closestCells[rndGroup][1],
-					true
-				);
-				this.rooms[item.room1].cells[item.closestCells[rndGroup][0].y][item.closestCells[rndGroup][0].x].mod =
-					newMods[0];
-				this.rooms[item.room2].cells[item.closestCells[rndGroup][1].y][item.closestCells[rndGroup][1].x].mod =
-					newMods[1];
-			}
-		}
-
-		// for (let corridorIndx in this.corridors) {
-		// 	const corridor = this.corridors[corridorIndx];
-		// 	for (let corridorCellIndx in corridor.cells) {
-		// 		const corridorCell = corridor.cells[corridorCellIndx];
-		// 		for (let roomIndx in this.rooms) {
-		// 			const room = this.rooms[roomIndx];
-
-		// 			for (let cellRowIndx in room.cells) {
-		// 				const cellRow = room.cells[cellRowIndx];
-		// 				for (let cellIndx in cellRow) {
-		// 					const cell = cellRow[cellIndx];
-		// 					if (this.isCoordClose(cell, corridorCell)) {
-		// 						if (
-		// 							(corridorCell.x === corridor.startX && corridorCell.y === corridor.startY) ||
-		// 							(corridorCell.x === corridor.endX && corridorCell.y === corridor.endY)
-		// 						) {
-		// 							console.log(cell, corridorCell);
-		// 							let res = this.removeModsForClosestCells(cell, corridorCell, true);
-		// 							this.rooms[roomIndx].cells[cellRowIndx][cellIndx].mod = res[0];
-		// 							this.corridors[corridorIndx].cells[corridorCellIndx].mod = res[1];
-		// 						}
-		// 					}
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
-		// console.log("closestCells", closestCells);
+		return closestRooms;
 	}
+
+	// Находит ближайшие пары ячеек между двумя комнатами
+	findClosestCells(room1Cells, room2Cells) {
+		const closestCells = [];
+
+		room1Cells.forEach((row1) => {
+			if (!row1) return;
+			row1.forEach((cell1) => {
+				room2Cells.forEach((row2) => {
+					if (!row2) return;
+					row2.forEach((cell2) => {
+						if (cell1 && cell2 && this.isCoordClose(cell1, cell2)) {
+							closestCells.push([cell1, cell2]);
+						}
+					});
+				});
+			});
+		});
+
+		return closestCells;
+	}
+
+	// Обновляет модификатор ячейки в комнате
+	updateCellMods(roomIndex, cell, newMod) {
+		this.rooms[roomIndex].cells[cell.y][cell.x].mod = newMod;
+	}
+
 	removeModsForClosestCells(cell1, cell2, addDoors = false) {
 		// console.log(cell1.mod, cell2.mod);
 		let removedMods = [];
@@ -225,18 +214,100 @@ class Dungeon {
 		// this.rooms.forEach((room) => {
 		const room = this.rooms[0];
 		let startCoord = room.getRandomOutermostCell();
-		let endCoord = this.rooms[1];
-		// let endCoord = this.rooms[Math.floor(Math.random() * this.rooms.length)];
-		const newCorridor = new Corridor(startCoord.x, startCoord.y, 40, this.width, this.height, room.id, endCoord.id);
-		newCorridor.moveTo(endCoord.getRandomOutermostCell(), this.rooms);
-		// newCorridor.moveTo(this.rooms[1]);
-		this.corridors.push(newCorridor);
+		// let endCoord = this.rooms[1];
+		let endCoord = rooms[1].getRandomOutermostCell();
+		// const newCorridor = new Corridor(startCoord.x, startCoord.y, 40, this.width, this.height, room.id, endCoord.id);
+		// newCorridor.moveTo(endCoord.getRandomOutermostCell(), this.rooms);
+		// // newCorridor.moveTo(this.rooms[1]);
+		// this.corridors.push(newCorridor);
+		this.pathFinder(startCoord, endCoord);
 		// console.log(room, this.rooms[1]);
 		// });
 	}
+	pathFinder(start, end) {
+		const openSet = [];
+		const closedSet = new Set();
+		const cameFrom = {};
+		const gScore = new Map();
+		const fScore = new Map();
+
+		openSet.push(start);
+		gScore.set(JSON.stringify(start), 0);
+		fScore.set(JSON.stringify(start), this.heuristic(start, end));
+
+		while (openSet.length > 0) {
+			openSet.sort((a, b) => fScore.get(JSON.stringify(a)) - fScore.get(JSON.stringify(b)));
+			const current = openSet.shift();
+
+			if (current.x === end.x && current.y === end.y) {
+				return this.reconstructPath(cameFrom, current);
+			}
+
+			closedSet.add(JSON.stringify(current));
+
+			const neighbors = this.getNeighbors(current);
+			for (const neighbor of neighbors) {
+				if (closedSet.has(JSON.stringify(neighbor))) continue;
+
+				const tentativeGScore = gScore.get(JSON.stringify(current)) + 1;
+
+				if (!gScore.has(JSON.stringify(neighbor)) || tentativeGScore < gScore.get(JSON.stringify(neighbor))) {
+					cameFrom[JSON.stringify(neighbor)] = current;
+					gScore.set(JSON.stringify(neighbor), tentativeGScore);
+					fScore.set(JSON.stringify(neighbor), tentativeGScore + this.heuristic(neighbor, end));
+
+					if (!openSet.some((n) => n.x === neighbor.x && n.y === neighbor.y)) {
+						openSet.push(neighbor);
+					}
+				}
+			}
+		}
+
+		return null; // Путь не найден
+	}
+
+	heuristic(a, b) {
+		return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+	}
+
+	reconstructPath(cameFrom, current) {
+		const totalPath = [current];
+		while (cameFrom[JSON.stringify(current)]) {
+			current = cameFrom[JSON.stringify(current)];
+			totalPath.unshift(current);
+		}
+		return totalPath;
+	}
+
+	getNeighbors(node) {
+		const directions = [
+			{ x: 0, y: -1 }, // Up
+			{ x: 0, y: 1 }, // Down
+			{ x: -1, y: 0 }, // Left
+			{ x: 1, y: 0 }, // Right
+		];
+
+		const neighbors = [];
+		for (const direction of directions) {
+			const neighbor = {
+				x: node.x + direction.x,
+				y: node.y + direction.y,
+			};
+			if (
+				neighbor.x >= 0 &&
+				neighbor.x < this.width &&
+				neighbor.y >= 0 &&
+				neighbor.y < this.height &&
+				this.grid[neighbor.y][neighbor.x] === 0
+			) {
+				neighbors.push(neighbor);
+			}
+		}
+		return neighbors;
+	}
 	placeRooms() {
 		this.generateRooms();
-		// this.createCorridors();
+		this.pathFinder();
 		this.createDoors();
 		// Логика размещения комнат, с учетом размещения друг относительно друга и стен.
 	}
@@ -278,7 +349,8 @@ class Dungeon {
 				});
 			});
 		});
-		return cells;
+		this.cells = cells;
+		return this.cells;
 	}
 }
 

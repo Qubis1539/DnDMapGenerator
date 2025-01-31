@@ -11,6 +11,7 @@ input::-webkit-inner-spin-button {
 	justify-content: center;
 	gap: 20px;
 	height: 100%;
+	padding: 20px;
 	position: relative;
 	color: wheat;
 }
